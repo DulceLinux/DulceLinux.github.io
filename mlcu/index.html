@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+	<meta charset="UTF-8">
+	<title>ML Utilities Calc</title>
+	<style>
+		* {
+		  padding: 0;
+		  margin: 0;
+		  box-sizing: border-box;
+		  font-family: Helvetica;
+		}
+
+		body {
+		  background-color: #777;
+		  height:100vh;
+		  display: flex;
+		  justify-content: center;
+		  align-items:center;
+		}
+
+		form {
+			padding-left:25px;
+			padding-right:25px;
+			padding-top:60px;
+			margin: 12px auto;
+			background:#ffe600;
+			border: 2px solid #2d3277;
+			border-radius: 20px;
+			position:absolute;
+			z-index:1;
+			width: calc(100vw - 80px);
+			top: 60px;
+			bottom: 40px;
+			left: 0;
+			right: 0;
+			text-align:center;
+		}
+
+		form div.logo{
+		  position:absolute;
+		  top:0;
+		  left:50%;
+		  padding:0 20px;
+		  transform:translate(-50%,-50%);
+		  background-color:#fff;
+		  border: 2px solid #2d3277;
+		  border-radius: 20px;
+		  text-align:center;
+		}
+
+		.logo > img{
+		  /*filter:invert(1);*/
+		  width:300px;
+		}
+
+		form select,
+		form input,
+		form textarea {
+			padding: 12px;
+			margin: 5px auto 20px auto;
+			border: 5px solid #2d3277;
+			color: #2d3277;
+			background-color: #fff;
+			border-radius: 4px;
+			display: block;
+			width: 100%;
+			height: 100px;
+			text-align:center;
+			font-size:1.8rem;
+			font-weight:600;
+		}
+
+		label,select,
+		form input[type="text"],
+		form textarea {
+			font-size:2rem  !important;
+			border-radius:50px !important;
+			/*border-width:5px !important;*/
+		}
+		
+		form textarea {
+			height:100px;
+			resize:none;
+		}
+
+		form input[type="button"],
+		form input[type="submit"] {
+			/*max-width: 20vw;*/
+			padding-left: 1%;
+			padding-right: 1%;
+			cursor: pointer;
+			transition: 0.35s;
+			height:100px;
+			display:inline-block;
+		}
+
+		form input[type="button"].active,
+		form input[type="button"]:hover,
+		form input[type="submit"]:hover {
+			background-color:#2d3277;
+			color:#ffe600;
+		}
+	</style>
+</head>
+<body>
+	<form>
+		<div class="logo">
+			<img src="ml.jpg" alt="icon">
+		</div>
+		<div>
+			<input id="btnConEnvio" type="button" value="ENVÍO INCLUIDO" style="width:49%;" class="active" onclick="fModoConEnvio()">
+			<input id="btnSinEnvio" type="button" value="ENVÍO NO INCLUIDO" style="width:49%;" onclick="fModoSinEnvio()">
+
+			<input id="btnChico" type="button" value="PRODUCTO
+CHICO" style="width:32%;" class="active" onclick="fProductoChico()">
+			<input id="btnMediano" type="button" value="PRODUCTO
+MEDIANO" style="width:32%;margin:12px 9px;" onclick="fProductoMediano()">
+			<input id="btnGrande" type="button" value="PRODUCTO
+GRANDE" style="width:32%;" onclick="fProductoGrande()">
+
+			<div>
+				<label id="labTipoEnvio" for="txtTipoEnvio">Tipo de env&iacute;o</label>
+				<input id="txtTipoEnvio" type="text" value="Se incluye envío (>= $299.00 MXN)" style="display:noneS;">
+				<label id="labTamanoProducto" for="txtTamanoProducto">Tamaño de producto</label>
+				<input id="txtTamanoProducto" type="text" value="Chico (-$0.60 MXN)" style="display:noneS;">
+				<label id="labPML" for="txtPML">PML (Precio Mercado Libre)</label>
+				<input id="txtPML" type="text" placeholder="PML (Precio Mercado Libre)" onkeyup="fCalgula()">
+				<label id="labPT" for="txtPT">PT (Precio Tienda)</label>
+				<input id="txtPT" type="text" placeholder="PT (Precio Tienda)" onkeyup="fCalgula()">
+				<!--<label for="txtEnvio">Envío (Costo)</label>
+				<input id="txtEnvio" type="text" placeholder="Envío (Costo)" required>-->
+				<label id="labEnvio" for="txtEnvio">Envío (Costo)</label>
+				<select id="selEnvio" onchange="fCalgula()">
+					<option value="62.5">DE 0.5 a 1 KG ($62.50 MXN)</option>
+					<option value="67.5">DE 1 a 2 KG ($67.50 MXN)</option>
+					<option value="78">DE 2 a 2 KG ($78.00 MXN)</option>
+					<option value="84">DE 3 a 5 KG ($84.00 MXN)</option>
+					<option value="102.5">DE 5 a 7 KG ($102.50 MXN)</option>
+					<option value="116.5">DE 7 a 9 KG ($116.50 MXN)</option>
+					<option value="130.5">DE 9 a 12 KG ($130.50 MXN)</option>
+				</select>
+				<!--<textarea placeholder="Subject (required)" required></textarea>-->
+			</div>
+
+			<input id="btnCalcular" type="button" value="CALCULAR" style="font-size:2.4rem;" onclick="fCalgula()">
+			<label id="labUtilidades" for="txtUtilidades">Utilidades</label>
+			<input id="txtUtilidades" type="text" placeholder="UTILIDADES" value="$0.00 MXN">
+		</div>
+	</form>
+	<script>
+		var btnConEnvio = document.getElementById("btnConEnvio");
+		var btnSinEnvio = document.getElementById("btnSinEnvio");
+		var btnChico = document.getElementById("btnChico");
+		var btnMediano = document.getElementById("btnMediano");
+		var btnGrande = document.getElementById("btnGrande");
+		var txtTipoEnvio = document.getElementById("txtTipoEnvio");
+		var txtTamanoProducto = document.getElementById("txtTamanoProducto");
+		var txtPML = document.getElementById("txtPML");
+		var txtPT = document.getElementById("txtPT");
+		var labEnvio = document.getElementById("labEnvio");
+		var selEnvio = document.getElementById("selEnvio");
+		var txtUtilidades = document.getElementById("txtUtilidades");
+		var btnCalcular = document.getElementById("btnCalcular");
+
+		txtTipoEnvio.disabled = true;
+		txtTamanoProducto.disabled = true;
+		txtUtilidades.disabled = true;
+		function fModoConEnvio() {
+			btnConEnvio.classList.add("active");
+			btnSinEnvio.classList.remove("active");
+			txtTipoEnvio.value = "Se incluye envío (>= $299.00 MXN)";
+			labEnvio.style.display = "unset";
+			selEnvio.style.display = "unset";
+			fCalgula();
+		}
+		function fModoSinEnvio() {
+			btnConEnvio.classList.remove("active");
+			btnSinEnvio.classList.add("active");
+			txtTipoEnvio.value = "No se incluye envío (<= $298.00 MXN)";
+			labEnvio.style.display = "none";
+			selEnvio.style.display = "none";
+			fCalgula();
+		}
+		function fProductoChico() {
+			btnChico.classList.add("active");
+			btnMediano.classList.remove("active");
+			btnGrande.classList.remove("active");
+			txtTamanoProducto.value = "Chico (-$0.60 MXN)";
+			fCalgula();
+		}
+		function fProductoMediano() {
+			btnChico.classList.remove("active");
+			btnMediano.classList.add("active");
+			btnGrande.classList.remove("active");
+			txtTamanoProducto.value = "Mediano (-$1.38 MXN)";
+			fCalgula();
+		}
+		function fProductoGrande() {
+			btnChico.classList.remove("active");
+			btnMediano.classList.remove("active");
+			btnGrande.classList.add("active");
+			txtTamanoProducto.value = "Grande (-$19.98 MXN)";
+			fCalgula();
+		}
+		function fCalgula() {
+			var TP = 0; //Tamaño producto
+			var PML = txtPML.value;
+			var PT = txtPT.value;
+			var ENV = selEnvio.value;
+			var UT = "$0.00 MXN";
+			var dResultado = 0;
+			
+			switch (txtTamanoProducto.value) {
+				case "Chico (-$0.60 MXN)": TP = 0.6; break;
+				case "Mediano (-$1.38 MXN)": TP = 1.38; break;
+				case "Grande (-$19.98 MXN)": TP = 19.98; break;
+				Default: txtTamanoProducto.value = ""; TP = 0; break;
+			}
+
+			console.log("___________________");
+			console.log("TP:", TP);
+			console.log("PML:", PML);
+			console.log("PT:", PT);
+			console.log("ENV:", ENV);
+			console.log("UT:", UT);
+			
+			switch (txtTipoEnvio.value) { //Calcula resultado
+				case "Se incluye envío (>= $299.00 MXN)":
+					if (TP != 0 && PML != "" && PT != "" && ENV != "") {
+						dResultado = PML - (PT*1.16) - (PML*0.205) - ENV - (PML*0.08) - (PML*0.01) - TP;
+
+						console.log("(PT*1.16)", (PT*1.16));
+						console.log("(PML*0.205)", (PML*0.205));
+						console.log("ENV", ENV);
+						console.log("(PML*0.08)", (PML*0.08));
+						console.log("(PML*0.01)", (PML*0.01));
+						console.log("TP", TP);
+
+						console.log("Con envío");
+					}
+					else { dResultado = 0; }
+					break;
+				case "No se incluye envío (<= $298.00 MXN)":
+					if (TP != 0 && PML != "" && PT != "") {
+						dResultado = PML - (PT*1.16) - ( (PML*0.205)+25 ) - (PML*0.08) - (PML*0.01) - TP;
+
+						console.log("(PT*1.16)", (PT*1.16));
+						console.log("( (PML*0.205)+25 )", ( (PML*0.205)+25 ));
+						console.log("(PML*0.08)", (PML*0.08));
+						console.log("(PML*0.01)", (PML*0.01));
+						console.log("TP", TP);
+
+						console.log("Sin envío");
+					}
+					else { dResultado = 0; }
+					break;
+				default: dResultado = 0; console.log("Error Envío"); break;
+			}
+			
+			UT = "$"+ parseFloat(dResultado).toFixed(2) +" MXN"; //Convierte a número con 2 decimales//////////////////////////////////CONVERTIR AQUIII
+
+			txtUtilidades.value = UT.replace("$-", "-$");
+			if (txtUtilidades.value == "$0.00 MXN") { txtUtilidades.style.color = "#000"; }
+			else if (dResultado > 0) { txtUtilidades.style.color = "#0c0"; }
+			else { txtUtilidades.style.color = "#c00"; }
+			if (txtUtilidades.value == "$0.00 MXN") { txtUtilidades.style.borderColor = "#c00"; }
+			else { txtUtilidades.style.borderColor = "#0c0"; }
+		}
+	</script>
+</body>
+</html>
